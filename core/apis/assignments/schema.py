@@ -2,6 +2,7 @@ from marshmallow import Schema, EXCLUDE, fields, post_load
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema, auto_field
 from marshmallow_enum import EnumField
 from core.models.assignments import Assignment, GradeEnum
+from core.models.teachers import Teacher
 from core.libs.helpers import GeneralObject
 
 
@@ -49,3 +50,31 @@ class AssignmentGradeSchema(Schema):
     def initiate_class(self, data_dict, many, partial):
         # pylint: disable=unused-argument,no-self-use
         return GeneralObject(**data_dict)
+
+
+class TeacherDumpSchema(SQLAlchemyAutoSchema):
+    class Meta:
+        model = Teacher
+        include_relationships = True
+        load_instance = True
+
+    id = auto_field()
+    created_at = auto_field()
+    updated_at = auto_field()
+    user_id = auto_field()
+
+# Include this dump schema in your TeacherSchema class
+class TeacherSchema(SQLAlchemyAutoSchema):
+    class Meta:
+        model = Teacher
+        include_relationships = True
+        load_instance = True
+
+    id = auto_field(required=False, allow_none=True)
+    created_at = auto_field(dump_only=True)
+    updated_at = auto_field(dump_only=True)
+    user_id = auto_field(dump_only=True)
+
+    @post_load
+    def initiate_class(self, data_dict, many, partial):
+        return Teacher(**data_dict)
